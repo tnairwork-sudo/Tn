@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: the-table-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: table
+      POSTGRES_PASSWORD: table
+      POSTGRES_DB: the_table
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../backend/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+
+volumes:
+  postgres_data:
