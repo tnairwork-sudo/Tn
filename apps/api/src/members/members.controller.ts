@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { sanitizeText } from '../common/sanitize';
 import { MembersService } from './members.service';
 
 @Controller()
@@ -20,8 +21,21 @@ export class MembersController {
   }
 
   @Post('introductions')
-  createIntroduction(@Body() body: Record<string, unknown>) {
-    return this.membersService.createIntroduction(body);
+  createIntroduction(
+    @Body()
+    body: {
+      memberAId?: unknown;
+      memberBId?: unknown;
+      editionId?: unknown;
+      contextNote?: unknown;
+    },
+  ) {
+    return this.membersService.createIntroduction({
+      memberAId: sanitizeText(body.memberAId),
+      memberBId: sanitizeText(body.memberBId),
+      editionId: sanitizeText(body.editionId),
+      contextNote: sanitizeText(body.contextNote),
+    });
   }
 
   @Get('introductions/mine')

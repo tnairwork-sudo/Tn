@@ -7,6 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { sanitizeText } from '../common/sanitize';
 import { TimeCapsulesService } from './time-capsules.service';
 
 @Controller()
@@ -23,23 +24,39 @@ export class TimeCapsulesController {
   }
 
   @Post('time-capsules')
-  create(@Body() body: Record<string, unknown>) {
-    return this.timeCapsulesService.create(body);
+  create(
+    @Body()
+    body: {
+      city?: unknown;
+      availableFrom?: unknown;
+      availableUntil?: unknown;
+      note?: unknown;
+    },
+  ) {
+    return this.timeCapsulesService.create({
+      city: sanitizeText(body.city),
+      availableFrom: sanitizeText(body.availableFrom),
+      availableUntil: sanitizeText(body.availableUntil),
+      note: sanitizeText(body.note),
+    });
   }
 
   @Post('time-capsules/:id/requests')
-  createRequest(
-    @Param('id') id: string,
-    @Body() body: Record<string, unknown>,
-  ) {
-    return this.timeCapsulesService.createRequest(id, body);
+  createRequest(@Param('id') id: string, @Body() body: { message?: unknown }) {
+    return this.timeCapsulesService.createRequest(id, {
+      message: sanitizeText(body.message),
+    });
   }
 
   @Patch('time-capsules/requests/:requestId')
   updateRequestStatus(
     @Param('requestId') requestId: string,
-    @Body() body: { status: 'accepted' | 'declined' },
+    @Body() body: { status?: unknown },
   ) {
-    return this.timeCapsulesService.updateRequestStatus(requestId, body.status);
+    const status = sanitizeText(body.status);
+    return this.timeCapsulesService.updateRequestStatus(
+      requestId,
+      status === 'accepted' ? 'accepted' : 'declined',
+    );
   }
 }

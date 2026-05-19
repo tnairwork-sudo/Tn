@@ -7,6 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { sanitizeText } from '../common/sanitize';
 import { FeedService } from './feed.service';
 
 @Controller()
@@ -19,8 +20,25 @@ export class FeedController {
   }
 
   @Post('feed/posts')
-  createPost(@Body() body: Record<string, unknown>) {
-    return this.feedService.createPost(body);
+  createPost(
+    @Body()
+    body: {
+      caption?: unknown;
+      city?: unknown;
+      neighborhoodLabel?: unknown;
+      assetIds?: unknown;
+    },
+  ) {
+    return this.feedService.createPost({
+      caption: sanitizeText(body.caption),
+      city: sanitizeText(body.city),
+      neighborhoodLabel: sanitizeText(body.neighborhoodLabel),
+      assetIds: Array.isArray(body.assetIds)
+        ? body.assetIds.filter(
+            (item): item is string => typeof item === 'string',
+          )
+        : [],
+    });
   }
 
   @Get('feed/posts/:id')
